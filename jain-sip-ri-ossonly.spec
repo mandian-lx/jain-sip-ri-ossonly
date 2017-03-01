@@ -1,4 +1,9 @@
-#FIXME: javadoc fails.
+%{?_javapackages_macros:%_javapackages_macros}
+
+#
+# FIXME: javadoc fails:
+#        Exit code: 1 - javadoc: error - Illegal package name: "ant-tasks.src.net.java.jsip.ant.tasks"
+#
 
 Summary:	The official Reference Implementation of the JAIN SIP API witch only OSS code 
 Name:		jain-sip-ri-ossonly
@@ -14,15 +19,8 @@ BuildRequires:	maven-local
 BuildRequires:	mvn(log4j:log4j)
 BuildRequires:	mvn(org.apache.felix:maven-bundle-plugin)
 BuildRequires:	mvn(org.apache.maven.plugins:maven-release-plugin)
-BuildRequires:	java-sdp-api #mvn(org.opentelecoms.sdp:sdp-api)
-BuildRequires:	java-sip-api #mvn(org.opentelecoms.sip:sip-api-1.2)
-
-Requires:	java-headless
-Requires:	javapackages-tools
-Requires:	mvn(jakarta-regexp:jakarta-regexp)
-Requires:	java-sip-api #mvn(org.opentelecoms.sip:sip-api-1.2)
-Requires:	java-sdp-api #mvn(org.opentelecoms.sdp:sdp-api)
-Requires:	mvn(log4j:log4j)
+BuildRequires:	mvn(org.opentelecoms.sip:sip-api-1.2)
+BuildRequires:	mvn(org.opentelecoms.sdp:sdp-api)
 
 %description
 Package of JAIN SIP and SDP that contains only OSS code
@@ -38,15 +36,15 @@ Package of JAIN SIP and SDP that contains only OSS code
 %doc licenses/JSIP\ Spec\ License.pdf
 
 #----------------------------------------------------------------------------
-
-%package javadoc
-Summary: Javadoc for %{name}
-
-%description javadoc
-API documentation for %{name}.
-
-%files javadoc -f .mfiles-javadoc
-
+#
+#package javadoc
+#Summary: Javadoc for %{name}
+#
+#description javadoc
+#API documentation for %{name}.
+#
+#files javadoc -f .mfiles-javadoc
+#
 #----------------------------------------------------------------------------
 
 %prep
@@ -54,6 +52,9 @@ API documentation for %{name}.
 # Delete all prebuild JARs and classes
 find . -name "*.jar" -delete
 find . -name "*.class" -delete
+
+# Fix version
+%pom_xpath_replace "pom:project/pom:version" "<version>%{version}</version>" m2/%{name}
 
 # Fix excludes
 %pom_xpath_remove "pom:plugin[pom:artifactId[./text()='maven-compiler-plugin']]/pom:configuration/pom:excludes" m2/%{name}
@@ -84,7 +85,7 @@ find . -name "*.class" -delete
 %mvn_file :%{name} %{name}-%{version} %{name}
 
 %build
-%mvn_build -- -f m2/%{name}/pom.xml -Dmaven.javadoc.failOnError=false -Dproject.build.sourceEncoding=ISO-8859-1 -Dmaven.compiler.source=1.7 -Dmaven.compiler.target=1.7
+%mvn_build -j -- -f m2/%{name}/pom.xml -Dproject.build.sourceEncoding=ISO-8859-1 -Dmaven.compiler.source=1.7 -Dmaven.compiler.target=1.7
 
 %install
 %mvn_install -- -f m2/%{name}/pom.xml 
